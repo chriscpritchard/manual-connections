@@ -35,7 +35,7 @@ check_tool curl curl
 check_tool jq jq
 
 # This allows you to set the maximum allowed latency in seconds.
-# All servers that repond slower than this will be ignored.
+# All servers that respond slower than this will be ignored.
 # You can inject this with the environment variable MAX_LATENCY.
 # The default value is 50 milliseconds.
 MAX_LATENCY=${MAX_LATENCY:-0.05}
@@ -63,11 +63,11 @@ printServerLatency() {
 export -f printServerLatency
 
 echo -n "Getting the server list... "
-# Get all region data since we will need this on multiple ocasions
+# Get all region data since we will need this on multiple occasions
 all_region_data=$(curl -s "$serverlist_url" | head -1)
 
 # If the server list has less than 1000 characters, it means curl failed.
-if [[ ${#all_region_data} < 1000 ]]; then
+if [[ ${#all_region_data} -lt 1000 ]]; then
   echo "Could not get correct region data. To debug this, run:"
   echo "$ curl -v $serverlist_url"
   echo "If it works, you will get a huge JSON as a response."
@@ -109,9 +109,9 @@ regionData="$( echo $all_region_data |
   '.regions[] | select(.id==$REGION_ID)')"
 
 echo -n The closest region is "$(echo $regionData | jq -r '.name')"
-if echo $regionData | jq -r '.geo' | grep true > /dev/null; then 
+if echo $regionData | jq -r '.geo' | grep true > /dev/null; then
   echo " (geolocated region)."
-else 
+else
   echo "."
 fi
 echo
@@ -176,7 +176,7 @@ if [[ $PIA_AUTOCONNECT == wireguard ]]; then
   echo The ./get_region_and_token.sh script got started with
   echo PIA_AUTOCONNECT=wireguard, so we will automatically connect to WireGuard,
   echo by running this command:
-  echo $ WG_TOKEN=\"$token\" \\
+  echo $ PIA_TOKEN=\"$token\" \\
   echo WG_SERVER_IP=$bestServer_WG_IP WG_HOSTNAME=$bestServer_WG_hostname \\
   echo PIA_PF=$PIA_PF ./connect_to_wireguard_with_token.sh
   echo
@@ -224,5 +224,5 @@ echo $ PIA_USER=p0123456 PIA_PASS=xxx \
   PIA_AUTOCONNECT=wireguard PIA_PF=true ./get_region_and_token.sh
 echo
 echo You can also connect now by running this command:
-echo $ WG_TOKEN=\"$token\" WG_SERVER_IP=$bestServer_WG_IP \
+echo $ PIA_TOKEN=\"$token\" WG_SERVER_IP=$bestServer_WG_IP \
   WG_HOSTNAME=$bestServer_WG_hostname ./connect_to_wireguard_with_token.sh

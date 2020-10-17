@@ -57,7 +57,7 @@ if [[ ! $WG_SERVER_IP || ! $WG_HOSTNAME || ! $PIA_TOKEN ]]; then
   echo "PAYLOAD_AND_SIGNATURE - In case you already have a port."
   echo
   echo An easy solution is to just run get_region_and_token.sh
-  echo as it will guide you through getting the best server and 
+  echo as it will guide you through getting the best server and
   echo also a token. Detailed information can be found here:
   echo https://github.com/pia-foss/manual-connections
   exit 1
@@ -102,6 +102,9 @@ echo
 # Create the WireGuard config based on the JSON received from the API
 # In case you want this section to also add the DNS setting, please
 # start the script with PIA_DNS=true.
+# This uses a PersistentKeepalive of 25 seconds to keep the NAT active
+# on firewalls. You can remove that line if your network does not
+# require it.
 echo -n "Trying to write /etc/wireguard/pia.conf... "
 mkdir -p /etc/wireguard
 if [ "$PIA_DNS" == true ]; then
@@ -117,6 +120,7 @@ Address = $(echo "$wireguard_json" | jq -r '.peer_ip')
 PrivateKey = $privKey
 $dnsSettingForVPN
 [Peer]
+PersistentKeepalive = 25
 PublicKey = $(echo "$wireguard_json" | jq -r '.server_key')
 AllowedIPs = 0.0.0.0/0
 Endpoint = ${WG_SERVER_IP}:$(echo "$wireguard_json" | jq -r '.server_port')
@@ -126,8 +130,8 @@ echo OK!
 # Start the WireGuard interface.
 # If something failed, stop this script.
 # If you get DNS errors because you miss some packages,
-# just can hardcode /etc/resolv.conf to "nameserver 10.0.0.242".
-echo 
+# just hardcode /etc/resolv.conf to "nameserver 10.0.0.242".
+echo
 echo Trying to create the wireguard interface...
 wg-quick up pia || exit 1
 echo "The WireGuard interface got created.
